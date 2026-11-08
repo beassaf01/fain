@@ -236,7 +236,9 @@
       div.textContent = str;
       return div.innerHTML;
     }
-
+    const sortedItems = (data.items || []).sort((a, b) => b.date.localeCompare(a.date));
+    renderArticles(sortedItems);
+    
     refreshBtn.addEventListener("click", () => loadNews(true));
     loadNews();
   </script>
