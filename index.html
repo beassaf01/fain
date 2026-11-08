@@ -156,7 +156,7 @@
 
   <script>
     // Замени на URL своего Cloudflare Worker
-    const WORKER_URL = "https://https://fain.weraktesau.workers.dev/";
+    const WORKER_URL = "https://fain.weraktesau.workers.dev";
 
     const feedContainer = document.getElementById("news-feed");
     const lastUpdatedEl = document.getElementById("last-updated");
@@ -236,9 +236,7 @@
       div.textContent = str;
       return div.innerHTML;
     }
-    const sortedItems = (data.items || []).sort((a, b) => b.date.localeCompare(a.date));
-    renderArticles(sortedItems);
-    
+
     refreshBtn.addEventListener("click", () => loadNews(true));
     loadNews();
   </script>
