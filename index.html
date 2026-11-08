@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>fain — free ai news</title>
+  <meta name="description" content="Свободные новости про ИИ, от ИИ. Только значимые релизы и технологии.">
+  <style>
+    :root {
+      --bg: #000000;
+      --fg: #e5e5e5;
+      --muted: #737373;
+      --border: #1f1f1f;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--fg);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      line-height: 1.65;
+      max-width: 660px;
+      margin: 0 auto;
+      padding: clamp(2rem, 6vw, 4.5rem) 1.25rem;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    header.site-header {
+      text-align: center;
+      margin-bottom: clamp(2.5rem, 6vw, 4rem);
+      padding-bottom: 1.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    header.site-header h1 {
+      font-size: clamp(2.25rem, 5vw, 3.25rem);
+      font-weight: 700;
+      letter-spacing: -0.04em;
+      line-height: 1.1;
+    }
+
+    header.site-header p {
+      color: var(--muted);
+      font-size: clamp(0.9rem, 2vw, 1.05rem);
+      margin-top: 0.5rem;
+    }
+
+    main {
+      display: flex;
+      flex-direction: column;
+      gap: clamp(2rem, 4vw, 3rem);
+    }
+
+    article {
+      padding-bottom: clamp(1.75rem, 4vw, 2.5rem);
+      border-bottom: 1px solid var(--border);
+    }
+
+    article:last-child {
+      border-bottom: none;
+    }
+
+    article header {
+      margin-bottom: 0.65rem;
+    }
+
+    article h2 {
+      font-size: clamp(1.2rem, 2.8vw, 1.45rem);
+      font-weight: 600;
+      line-height: 1.35;
+      letter-spacing: -0.015em;
+    }
+
+    article h2 a {
+      color: var(--fg);
+      text-decoration: none;
+    }
+
+    article h2 a:hover,
+    article h2 a:focus-visible {
+      text-decoration: underline;
+      text-underline-offset: 4px;
+    }
+
+    article p {
+      font-size: clamp(1rem, 2.2vw, 1.1rem);
+      color: #cccccc;
+      margin-bottom: 0.85rem;
+    }
+
+    article footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.85rem;
+      color: var(--muted);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .status-message {
+      text-align: center;
+      color: var(--muted);
+      padding: 3rem 0;
+      font-size: 1rem;
+    }
+
+    footer.site-footer {
+      margin-top: clamp(3rem, 6vw, 4.5rem);
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border);
+      text-align: center;
+      font-size: 0.85rem;
+      color: var(--muted);
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      align-items: center;
+    }
+
+    button.refresh-btn {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      padding: 0.35rem 0.75rem;
+      font: inherit;
+      font-size: 0.8rem;
+      cursor: pointer;
+    }
+
+    button.refresh-btn:hover {
+      color: var(--fg);
+      border-color: var(--muted);
+    }
+  </style>
+</head>
+<body>
+
+  <header class="site-header">
+    <h1>fain</h1>
+    <p>free ai news — свободные новости про ИИ, от ИИ</p>
+  </header>
+
+  <main id="news-feed" aria-live="polite">
+    <p class="status-message">Сбор и фильтрация свежих материалов...</p>
+  </main>
+
+  <footer class="site-footer">
+    <p id="last-updated">Автоматический отбор значимых релизов через Gemini API</p>
+    <button type="button" class="refresh-btn" id="refresh-btn">Обновить ленту</button>
+  </footer>
+
+  <script>
+    // Замени на URL своего Cloudflare Worker
+    const WORKER_URL = "https://fain-worker.ТВОЙ-САБДОМЕН.workers.dev";
+
+    const feedContainer = document.getElementById("news-feed");
+    const lastUpdatedEl = document.getElementById("last-updated");
+    const refreshBtn = document.getElementById("refresh-btn");
+
+    async function loadNews(forceRefresh = false) {
+      feedContainer.innerHTML = '<p class="status-message">Сбор и фильтрация свежих материалов...</p>';
+      refreshBtn.disabled = true;
+
+      try {
+        const endpoint = forceRefresh ? `${WORKER_URL}?refresh=1` : WORKER_URL;
+        const response = await fetch(endpoint);
+        const data = await response.json();
+
+        if (!response.ok || data.error) {
+          throw new Error(data.error || `HTTP ${response.status}`);
+        }
+
+        renderArticles(data.items || []);
+
+        if (data.updatedAt) {
+          const date = new Date(data.updatedAt);
+          lastUpdatedEl.textContent = `Обновлено: ${date.toLocaleString("ru-RU")}`;
+        }
+      } catch (err) {
+        feedContainer.innerHTML = `<p class="status-message">Не удалось загрузить новости: ${escapeHTML(err.message)}</p>`;
+      } finally {
+        refreshBtn.disabled = false;
+      }
+    }
+
+    function renderArticles(items) {
+      if (!items.length) {
+        feedContainer.innerHTML = '<p class="status-message">Значимых новостей за последнее время не найдено.</p>';
+        return;
+      }
+
+      feedContainer.innerHTML = "";
+      const fragment = document.createDocumentFragment();
+
+      for (const item of items) {
+        const article = document.createElement("article");
+
+        const header = document.createElement("header");
+        const h2 = document.createElement("h2");
+        const link = document.createElement("a");
+        link.href = item.url;
+        link.target = "_blank";
+        link.rel = "noopener noreferrer";
+        link.textContent = item.title;
+        h2.appendChild(link);
+        header.appendChild(h2);
+
+        const summary = document.createElement("p");
+        summary.textContent = item.summary;
+
+        const footer = document.createElement("footer");
+        const source = document.createElement("span");
+        source.textContent = item.source;
+
+        const time = document.createElement("time");
+        if (item.date) {
+          time.setAttribute("datetime", item.date);
+          time.textContent = item.date;
+        }
+
+        footer.append(source, time);
+        article.append(header, summary, footer);
+        fragment.appendChild(article);
+      }
+
+      feedContainer.appendChild(fragment);
+    }
+
+    function escapeHTML(str) {
+      const div = document.createElement("div");
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    refreshBtn.addEventListener("click", () => loadNews(true));
+    loadNews();
+  </script>
+</body>
+</html>
