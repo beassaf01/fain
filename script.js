@@ -1,5 +1,5 @@
 const WORKER_URL = "https://fain.weraktesau.workers.dev/";
-const STORAGE_KEY = "fain_cached_feed_v5";
+const STORAGE_KEY = "fain_cached_feed_v6";
 
 const feedContainer = document.getElementById("news-feed");
 const lastUpdatedEl = document.getElementById("last-updated");
@@ -27,7 +27,10 @@ updateToastBtn.addEventListener("click", () => {
 });
 
 async function initFeed() {
-  // 1. Мгновенно показываем локальный кэш браузера, если он есть
+  // Удаляем старый кэш v5, где сохранились новости от 22:02 без тегов
+  localStorage.removeItem("fain_cached_feed_v5");
+
+  // 1. Мгновенно показываем актуальный локальный кэш браузера, если он есть
   const localRaw = localStorage.getItem(STORAGE_KEY);
   if (localRaw) {
     try {
@@ -40,14 +43,14 @@ async function initFeed() {
     }
   }
 
-  // 2. Запрашиваем актуальные данные с воркера
+  // 2. Запрашиваем актуальные данные с воркера в обход браузерного HTTP-кэша
   await fetchFromWorker();
 }
 
 async function fetchFromWorker(forceBgCheck = false) {
   try {
     const targetUrl = forceBgCheck ? `${WORKER_URL}?check=1` : WORKER_URL;
-    const response = await fetch(targetUrl);
+    const response = await fetch(targetUrl, { cache: "no-store" });
     const data = await response.json();
 
     if (!response.ok || data.error) {
@@ -79,7 +82,7 @@ function pollForBackgroundUpdate(previousTimestamp, attempt = 1) {
   if (attempt > 8) return; // Максимум 8 проверок с интервалом 12 секунд
   setTimeout(async () => {
     try {
-      const res = await fetch(`${WORKER_URL}?status=1`);
+      const res = await fetch(`${WORKER_URL}?status=1`, { cache: "no-store" });
       if (!res.ok) return;
       const data = await res.json();
       if (data.updatedAt && data.updatedAt !== previousTimestamp && Array.isArray(data.items)) {
@@ -126,13 +129,16 @@ function renderArticles(items) {
     const article = document.createElement("article");
     const header = document.createElement("header");
 
-    const rawTag = (item.tag || "релиз").toLowerCase().replace(/^#/, "");
-    const tagMeta = TAG_CONFIG[rawTag] || TAG_CONFIG["релиз"];
+    // Если тег есть в списке — рисуем плашку, если тега нет — оставляем карточку без маркера
+    const rawTag = item.tag ? String(item.tag).toLowerCase().replace(/^#/, "").trim() : "";
+    const tagMeta = TAG_CONFIG[rawTag];
 
-    const tagBadge = document.createElement("span");
-    tagBadge.className = `news-tag ${tagMeta.className}`;
-    tagBadge.textContent = tagMeta.label;
-    header.appendChild(tagBadge);
+    if (tagMeta) {
+      const tagBadge = document.createElement("span");
+      tagBadge.className = `news-tag ${tagMeta.className}`;
+      tagBadge.textContent = tagMeta.label;
+      header.appendChild(tagBadge);
+    }
 
     const h2 = document.createElement("h2");
     const link = document.createElement("a");
