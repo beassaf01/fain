@@ -59,6 +59,59 @@ article:last-child {
 
 article header {
   margin-bottom: 0.65rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+/* Маркеры категорий в стиле ролей Telegram */
+.news-tag {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1;
+  padding: 0.28rem 0.6rem;
+  border-radius: 6px;
+  letter-spacing: 0.01em;
+  user-select: none;
+}
+
+.tag-release {
+  color: #34d399;
+  background-color: rgba(52, 211, 153, 0.12);
+  border: 1px solid rgba(52, 211, 153, 0.22);
+}
+
+.tag-announce {
+  color: #60a5fa;
+  background-color: rgba(96, 165, 250, 0.12);
+  border: 1px solid rgba(96, 165, 250, 0.22);
+}
+
+.tag-tool {
+  color: #c084fc;
+  background-color: rgba(192, 132, 252, 0.12);
+  border: 1px solid rgba(192, 132, 252, 0.22);
+}
+
+.tag-research {
+  color: #fbbf24;
+  background-color: rgba(251, 191, 36, 0.12);
+  border: 1px solid rgba(251, 191, 36, 0.22);
+}
+
+.tag-opensource {
+  color: #2dd4bf;
+  background-color: rgba(45, 212, 191, 0.12);
+  border: 1px solid rgba(45, 212, 191, 0.22);
+}
+
+.tag-industry {
+  color: #fb7185;
+  background-color: rgba(251, 113, 133, 0.12);
+  border: 1px solid rgba(251, 113, 133, 0.22);
 }
 
 article h2 {
@@ -94,6 +147,46 @@ article footer {
   font-variant-numeric: tabular-nums;
 }
 
+/* Ненавязчивая плавающая кнопка обновления */
+.update-toast {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  z-index: 50;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  background-color: rgba(18, 18, 18, 0.92);
+  backdrop-filter: blur(8px);
+  color: var(--fg);
+  border: 1px solid #333333;
+  border-radius: 999px;
+  padding: 0.65rem 1.1rem;
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.65);
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.update-toast[hidden] {
+  display: none;
+}
+
+.update-toast:hover {
+  border-color: #60a5fa;
+  transform: translateY(-2px);
+}
+
+.toast-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #34d399;
+  box-shadow: 0 0 8px #34d399;
+}
+
 .status-message {
   text-align: center;
   color: var(--muted);
@@ -101,11 +194,48 @@ article footer {
   font-size: 1rem;
 }
 
+/* Иконка GitHub без обводки над футером */
+.github-link-wrap {
+  display: flex;
+  justify-content: center;
+  margin-top: clamp(2.5rem, 5vw, 4rem);
+}
+
+.github-link {
+  display: inline-flex;
+  color: var(--muted);
+  text-decoration: none;
+  border: none;
+  outline: none;
+  transition: color 0.2s ease, transform 0.2s ease;
+}
+
+.github-link:hover,
+.github-link:focus-visible {
+  color: var(--fg);
+  transform: translateY(-1px);
+}
+
+.github-link svg {
+  width: 24px;
+  height: 24px;
+  fill: currentColor;
+}
+
 footer.site-footer {
-  margin-top: clamp(3rem, 6vw, 4.5rem);
+  margin-top: 1.25rem;
   padding-top: 1.5rem;
   border-top: 1px solid var(--border);
   text-align: center;
   font-size: 0.85rem;
   color: var(--muted);
+}
+
+@media (max-width: 540px) {
+  .update-toast {
+    left: 1rem;
+    right: 1rem;
+    bottom: 1rem;
+    justify-content: center;
+  }
 }
