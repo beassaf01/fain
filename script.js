@@ -1,18 +1,9 @@
-const WORKER_URL = "https://fain.weraktesau.workers.dev/";
-const STORAGE_KEY = "fain_cached_feed_v6";
+const WORKER_URL = "https://fain-worker.weraktesau.workers.dev/";
+const STORAGE_KEY = "fain_cached_feed_v7";
 
 const feedContainer = document.getElementById("news-feed");
 const lastUpdatedEl = document.getElementById("last-updated");
 const updateToastBtn = document.getElementById("update-toast");
-
-const TAG_CONFIG = {
-  "релиз": { label: "#релиз", className: "tag-release" },
-  "анонс": { label: "#анонс", className: "tag-announce" },
-  "инструмент": { label: "#инструмент", className: "tag-tool" },
-  "исследование": { label: "#исследование", className: "tag-research" },
-  "опенсорс": { label: "#опенсорс", className: "tag-opensource" },
-  "индустрия": { label: "#индустрия", className: "tag-industry" }
-};
 
 let currentRenderedTimestamp = null;
 let pendingFeedData = null;
@@ -27,10 +18,9 @@ updateToastBtn.addEventListener("click", () => {
 });
 
 async function initFeed() {
-  // Удаляем старый кэш v5, где сохранились новости от 22:02 без тегов
   localStorage.removeItem("fain_cached_feed_v5");
+  localStorage.removeItem("fain_cached_feed_v6");
 
-  // 1. Мгновенно показываем актуальный локальный кэш браузера, если он есть
   const localRaw = localStorage.getItem(STORAGE_KEY);
   if (localRaw) {
     try {
@@ -43,31 +33,26 @@ async function initFeed() {
     }
   }
 
-  // 2. Запрашиваем актуальные данные с воркера в обход браузерного HTTP-кэша
   await fetchFromWorker();
 }
 
-async function fetchFromWorker(forceBgCheck = false) {
+async function fetchFromWorker() {
   try {
-    const targetUrl = forceBgCheck ? `${WORKER_URL}?check=1` : WORKER_URL;
-    const response = await fetch(targetUrl, { cache: "no-store" });
+    const response = await fetch(WORKER_URL, { cache: "no-store" });
     const data = await response.json();
 
     if (!response.ok || data.error) {
       throw new Error(data.error || `HTTP ${response.status}`);
     }
 
-    // Если экран был пустым (первый визит), сразу рисуем ответ воркера
     if (!currentRenderedTimestamp) {
       applyFeedData(data);
     } else if (data.updatedAt && data.updatedAt !== currentRenderedTimestamp) {
-      // Если у пользователя уже открыта старая лента, а пришла новая — показываем кнопку
       pendingFeedData = data;
       localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
       updateToastBtn.hidden = false;
     }
 
-    // Если воркер отдал старый кэш и запустил фоновую пересборку — ждем ее завершения
     if (data.stale) {
       pollForBackgroundUpdate(data.updatedAt);
     }
@@ -79,7 +64,7 @@ async function fetchFromWorker(forceBgCheck = false) {
 }
 
 function pollForBackgroundUpdate(previousTimestamp, attempt = 1) {
-  if (attempt > 8) return; // Максимум 8 проверок с интервалом 12 секунд
+  if (attempt > 8) return;
   setTimeout(async () => {
     try {
       const res = await fetch(`${WORKER_URL}?status=1`, { cache: "no-store" });
@@ -92,9 +77,7 @@ function pollForBackgroundUpdate(previousTimestamp, attempt = 1) {
       } else {
         pollForBackgroundUpdate(previousTimestamp, attempt + 1);
       }
-    } catch (_) {
-      // Игнорируем сетевые сбои при фоновом опросе
-    }
+    } catch (_) {}
   }, 12000);
 }
 
@@ -102,17 +85,13 @@ function applyFeedData(data) {
   currentRenderedTimestamp = data.updatedAt || new Date().toISOString();
   localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
 
-  const sortedItems = (data.items || []).sort((a, b) => {
-    return (b.date || "").localeCompare(a.date || "");
-  });
-
+  const sortedItems = (data.items || []).sort((a, b) => (b.date || "").localeCompare(a.date || ""));
   renderArticles(sortedItems);
 
   if (data.notice) {
     lastUpdatedEl.textContent = data.notice;
   } else if (data.updatedAt) {
-    const date = new Date(data.updatedAt);
-    lastUpdatedEl.textContent = `Обновлено: ${date.toLocaleString("ru-RU")}`;
+    lastUpdatedEl.textContent = `Обновлено: ${new Date(data.updatedAt).toLocaleString("ru-RU")}`;
   }
 }
 
@@ -127,18 +106,6 @@ function renderArticles(items) {
 
   for (const item of items) {
     const article = document.createElement("article");
-    const header = document.createElement("header");
-
-    // Если тег есть в списке — рисуем плашку, если тега нет — оставляем карточку без маркера
-    const rawTag = item.tag ? String(item.tag).toLowerCase().replace(/^#/, "").trim() : "";
-    const tagMeta = TAG_CONFIG[rawTag];
-
-    if (tagMeta) {
-      const tagBadge = document.createElement("span");
-      tagBadge.className = `news-tag ${tagMeta.className}`;
-      tagBadge.textContent = tagMeta.label;
-      header.appendChild(tagBadge);
-    }
 
     const h2 = document.createElement("h2");
     const link = document.createElement("a");
@@ -147,7 +114,6 @@ function renderArticles(items) {
     link.rel = "noopener noreferrer";
     link.textContent = item.title;
     h2.appendChild(link);
-    header.appendChild(h2);
 
     const summary = document.createElement("p");
     summary.textContent = item.summary;
@@ -163,7 +129,7 @@ function renderArticles(items) {
     }
 
     footer.append(source, time);
-    article.append(header, summary, footer);
+    article.append(h2, summary, footer);
     fragment.appendChild(article);
   }
 
