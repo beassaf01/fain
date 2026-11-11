@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>fain — free ai news</title>
-  <meta name="description" content="Свободные новости про ИИ, от ИИ. Только значимые релизы и технологии.">
+  <meta name="description" content="Минималистичные ИИ-новости про ИИ. Только значимые релизы и технологии.">
   <link rel="stylesheet" href="style.css">
   <script src="script.js" defer></script>
 </head>
@@ -22,10 +22,8 @@
 
   <header class="site-header">
     <h1>fain</h1>
-    <p id="header-subtitle">free ai news — свободные новости про ИИ, от ИИ</p>
+    <p id="header-subtitle">free ai news — минималистичные ИИ-новости про ИИ</p>
   </header>
-
-  <button id="update-toast" class="update-toast" hidden aria-live="polite">Обновить ленту</button>
 
   <main id="news-feed" aria-live="polite">
     <p class="status-message">Сбор и фильтрация свежих материалов...</p>
@@ -35,10 +33,11 @@
     <div class="archive-bar">
       <button id="back-to-feed" class="text-btn" type="button">← К ленте</button>
       <div class="archive-actions">
-        <button id="clear-archive" class="text-btn" type="button" title="Очистить список, но не возвращать в ленту">Очистить</button>
-        <button id="restore-archive" class="text-btn" type="button" title="Очистить архив и вернуть новости в ленту">Очистить и вернуть</button>
+        <button id="clear-archive" class="text-btn" type="button" title="Очистить архив прочитанного">Очистить архив</button>
       </div>
     </div>
+
+    <div id="archive-detail" class="archive-detail" hidden></div>
     <ul id="archive-list" class="archive-list"></ul>
   </section>
 
