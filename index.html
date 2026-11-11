@@ -9,9 +9,13 @@
   <script src="script.js" defer></script>
 </head>
 <body>
-  <button id="archive-toggle" class="archive-toggle" type="button" aria-label="Прочитанные новости" title="Прочитанные новости">
+
+  <pre id="ascii-left" class="ascii-side left" aria-hidden="true"></pre>
+  <pre id="ascii-right" class="ascii-side right" aria-hidden="true"></pre>
+
+  <button id="archive-toggle" class="archive-toggle" type="button" aria-label="Архив прочитанного" title="Архив прочитанного">
     <svg viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M4 4h16v4H4V4zm2 6h12v10H6V10zm4 3v2h4v-2h-4z"/>
+      <path d="M20.54 5.23l-1.39-1.68C18.88 3.21 18.47 3 18 3H6c-.47 0-.88.21-1.16.55L3.46 5.23C3.17 5.57 3 6.02 3 6.5V19c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6.5c0-.48-.17-.93-.46-1.27zM12 17.5L6.5 12H10v-2h4v2h3.5L12 17.5zM5.12 5l.81-1h12l.94 1H5.12z"/>
     </svg>
     <span id="archive-count" class="archive-count" hidden>0</span>
   </button>
@@ -29,8 +33,11 @@
 
   <section id="archive-view" class="archive-view" hidden aria-live="polite">
     <div class="archive-bar">
-      <button id="back-to-feed" class="text-btn" type="button">← Назад к ленте</button>
-      <button id="clear-archive" class="text-btn" type="button">Очистить архив</button>
+      <button id="back-to-feed" class="text-btn" type="button">← К ленте</button>
+      <div class="archive-actions">
+        <button id="clear-archive" class="text-btn" type="button" title="Очистить список, но не возвращать в ленту">Очистить</button>
+        <button id="restore-archive" class="text-btn" type="button" title="Очистить архив и вернуть новости в ленту">Очистить и вернуть</button>
+      </div>
     </div>
     <ul id="archive-list" class="archive-list"></ul>
   </section>
