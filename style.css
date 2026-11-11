@@ -20,6 +20,62 @@ body {
   margin: 0 auto;
   padding: clamp(2rem, 6vw, 4.5rem) 1.25rem;
   -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+.ascii-fuji {
+  position: fixed;
+  left: 50%;
+  bottom: 4vh;
+  transform: translateX(-50%);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: clamp(6px, 1.05vw, 12px);
+  line-height: 1.15;
+  color: rgba(255, 255, 255, 0.055);
+  pointer-events: none;
+  user-select: none;
+  z-index: 0;
+  white-space: pre;
+}
+
+.site-header,
+main,
+.archive-view,
+.github-link-wrap,
+.site-footer {
+  position: relative;
+  z-index: 1;
+}
+
+.archive-toggle {
+  position: fixed;
+  top: 1.25rem;
+  right: 1.25rem;
+  z-index: 50;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: rgba(12, 12, 12, 0.85);
+  backdrop-filter: blur(8px);
+  color: var(--muted);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 0.45rem 0.75rem;
+  font: 500 0.78rem inherit;
+  cursor: pointer;
+  transition: color 0.2s, border-color 0.2s;
+}
+
+.archive-toggle:hover,
+.archive-toggle.active {
+  color: var(--fg);
+  border-color: var(--fg);
+}
+
+.archive-toggle svg {
+  width: 16px;
+  height: 16px;
+  fill: currentColor;
 }
 
 .site-header {
@@ -39,7 +95,8 @@ body {
 .site-header p,
 .site-footer,
 .status-message,
-article footer {
+article footer,
+.archive-meta {
   color: var(--muted);
 }
 
@@ -51,16 +108,35 @@ article footer {
 main {
   display: flex;
   flex-direction: column;
-  gap: clamp(2rem, 4vw, 3rem);
+  gap: clamp(2.25rem, 4.5vw, 3.25rem);
 }
 
 article {
-  padding-bottom: clamp(1.75rem, 4vw, 2.5rem);
-  border-bottom: 1px solid var(--border);
+  cursor: grab;
+  touch-action: pan-y;
+  user-select: none;
+  transition: transform 0.22s ease, opacity 0.22s ease;
 }
 
-article:last-child {
-  border-bottom: 0;
+article:active {
+  cursor: grabbing;
+}
+
+article.removing {
+  transform: translateX(120px) !important;
+  opacity: 0 !important;
+  pointer-events: none;
+}
+
+.news-tag {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #a3a3a3;
+  border: 1px solid #262626;
+  border-radius: 4px;
+  padding: 0.1rem 0.45rem;
+  margin-bottom: 0.45rem;
 }
 
 article h2 {
@@ -71,13 +147,15 @@ article h2 {
   margin-bottom: 0.65rem;
 }
 
-article h2 a {
-  color: inherit;
+article h2 a,
+.archive-item a {
+  color: var(--fg);
   text-decoration: none;
+  cursor: pointer;
 }
 
 article h2 a:hover,
-article h2 a:focus-visible {
+.archive-item a:hover {
   text-decoration: underline;
   text-underline-offset: 4px;
 }
@@ -88,11 +166,45 @@ article p {
   margin-bottom: 0.85rem;
 }
 
-article footer {
+article footer,
+.archive-bar {
   display: flex;
   justify-content: space-between;
   font-size: 0.85rem;
   font-variant-numeric: tabular-nums;
+}
+
+.archive-bar {
+  margin-bottom: 1.75rem;
+}
+
+.text-btn {
+  background: none;
+  border: 0;
+  color: var(--muted);
+  font: inherit;
+  cursor: pointer;
+}
+
+.text-btn:hover {
+  color: var(--fg);
+}
+
+.archive-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.archive-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.archive-meta {
+  font-size: 0.78rem;
 }
 
 .update-toast {
@@ -111,13 +223,13 @@ article footer {
   transition: transform 0.2s, border-color 0.2s;
 }
 
-.update-toast[hidden] {
-  display: none;
-}
-
 .update-toast:hover {
   border-color: var(--fg);
   transform: translateY(-2px);
+}
+
+[hidden] {
+  display: none !important;
 }
 
 .status-message,
@@ -140,8 +252,7 @@ article footer {
   transition: color 0.2s, transform 0.2s;
 }
 
-.github-link:hover,
-.github-link:focus-visible {
+.github-link:hover {
   color: var(--fg);
   transform: translateY(-1px);
 }
@@ -157,12 +268,4 @@ article footer {
   padding-top: 1.5rem;
   border-top: 1px solid var(--border);
   font-size: 0.85rem;
-}
-
-@media (max-width: 540px) {
-  .update-toast {
-    left: 1rem;
-    right: 1rem;
-    bottom: 1rem;
-  }
 }
