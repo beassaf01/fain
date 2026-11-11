@@ -1,6 +1,7 @@
 const WORKER_URL = "https://fain-worker.weraktesau.workers.dev/";
-const STORAGE_KEY = "fain_cached_feed_v8";
-const READ_STORAGE_KEY = "fain_read_archive_v1";
+const STORAGE_KEY = "fain_cached_feed_v9";
+const ARCHIVE_KEY = "fain_read_archive_v1";
+const DISMISSED_KEY = "fain_dismissed_urls_v1";
 
 const feedContainer = document.getElementById("news-feed");
 const archiveView = document.getElementById("archive-view");
@@ -9,6 +10,7 @@ const archiveToggleBtn = document.getElementById("archive-toggle");
 const archiveCountEl = document.getElementById("archive-count");
 const backToFeedBtn = document.getElementById("back-to-feed");
 const clearArchiveBtn = document.getElementById("clear-archive");
+const restoreArchiveBtn = document.getElementById("restore-archive");
 const headerSubtitle = document.getElementById("header-subtitle");
 const lastUpdatedEl = document.getElementById("last-updated");
 const updateToastBtn = document.getElementById("update-toast");
@@ -16,49 +18,87 @@ const updateToastBtn = document.getElementById("update-toast");
 let currentRenderedTimestamp = null;
 let pendingFeedData = null;
 let allFeedItems = [];
-let readArchive = loadReadArchive();
 let isArchiveOpen = false;
 
-function loadReadArchive() {
+let readArchive = loadJSON(ARCHIVE_KEY, []);
+// Синхронизируем скрытые URL с уже имеющимся архивом при первом запуске
+let dismissedUrls = new Set(loadJSON(DISMISSED_KEY, readArchive.map((i) => i.url)));
+
+function loadJSON(key, fallback) {
   try {
-    const raw = localStorage.getItem(READ_STORAGE_KEY);
-    const parsed = raw ? JSON.parse(raw) : [];
-    return Array.isArray(parsed) ? parsed : [];
+    const parsed = JSON.parse(localStorage.getItem(key) || "null");
+    return Array.isArray(parsed) ? parsed : fallback;
   } catch (_) {
-    return [];
+    return fallback;
   }
 }
 
-function saveReadArchive() {
-  localStorage.setItem(READ_STORAGE_KEY, JSON.stringify(readArchive));
-  updateArchiveBadge();
+function saveState() {
+  localStorage.setItem(ARCHIVE_KEY, JSON.stringify(readArchive));
+  localStorage.setItem(DISMISSED_KEY, JSON.stringify([...dismissedUrls]));
+  archiveCountEl.textContent = readArchive.length;
+  archiveCountEl.hidden = readArchive.length === 0;
 }
 
-function updateArchiveBadge() {
-  const count = readArchive.length;
-  archiveCountEl.textContent = count;
-  archiveCountEl.hidden = count === 0;
-}
+// Генерация ASCII-синусоид по бокам экрана (только если есть место)
+function generateSideWaves() {
+  const leftEl = document.getElementById("ascii-left");
+  const rightEl = document.getElementById("ascii-right");
+  if (!leftEl || !rightEl) return;
 
-function isUrlRead(url) {
-  return readArchive.some((entry) => entry.url === url);
+  if (window.innerWidth < 1080) {
+    leftEl.textContent = "";
+    rightEl.textContent = "";
+    return;
+  }
+
+  const rows = Math.ceil(window.innerHeight / 15);
+  const cols = 26;
+  const palette = "@#%*+:-.";
+
+  const buildWave = (phaseOffset) => {
+    const lines = [];
+    for (let y = 0; y < rows; y++) {
+      const wave1 = Math.sin(y * 0.16 + phaseOffset) * 7.5 + 12.5;
+      const wave2 = Math.cos(y * 0.08 - phaseOffset) * 3.5;
+      const center = wave1 + wave2 * 0.5;
+      let line = "";
+
+      for (let x = 0; x < cols; x++) {
+        const dist = Math.abs(x - center);
+        if (dist < 3.6) {
+          const idx = Math.min(palette.length - 1, Math.floor((dist / 3.6) * palette.length));
+          line += palette[idx];
+        } else if (x === 2 || x === cols - 3) {
+          line += y % 3 === 0 ? ":" : ".";
+        } else {
+          line += " ";
+        }
+      }
+      lines.push(line);
+    }
+    return lines.join("\n");
+  };
+
+  leftEl.textContent = buildWave(0);
+  rightEl.textContent = buildWave(Math.PI);
 }
 
 function markItemAsRead(item, articleEl) {
-  if (!item || !item.url || articleEl.classList.contains("removing")) return;
+  if (!item?.url || articleEl.classList.contains("removing")) return;
   articleEl.classList.add("removing");
 
-  if (!isUrlRead(item.url)) {
+  dismissedUrls.add(item.url);
+  if (!readArchive.some((entry) => entry.url === item.url)) {
     readArchive.unshift({
       url: item.url,
       title: item.title,
       source: item.source,
       date: item.date,
-      tag: item.tag || "релиз",
-      readAt: new Date().toISOString()
+      tag: item.tag || "релиз"
     });
-    saveReadArchive();
   }
+  saveState();
 
   setTimeout(() => {
     articleEl.remove();
@@ -68,17 +108,21 @@ function markItemAsRead(item, articleEl) {
   }, 220);
 }
 
-archiveToggleBtn.addEventListener("click", () => {
-  toggleView(!isArchiveOpen);
-});
+archiveToggleBtn.addEventListener("click", () => toggleView(!isArchiveOpen));
+backToFeedBtn.addEventListener("click", () => toggleView(false));
 
-backToFeedBtn.addEventListener("click", () => {
-  toggleView(false);
-});
-
+// Очищает только список в архиве, прочитанные новости НЕ возвращаются в ленту
 clearArchiveBtn.addEventListener("click", () => {
   readArchive = [];
-  saveReadArchive();
+  saveState();
+  renderArchive();
+});
+
+// Очищает и архив, и память скрытых URL — новости возвращаются в ленту
+restoreArchiveBtn.addEventListener("click", () => {
+  readArchive = [];
+  dismissedUrls.clear();
+  saveState();
   renderArchive();
   renderArticles(allFeedItems);
 });
@@ -100,7 +144,7 @@ function toggleView(showArchive) {
 
 function renderArchive() {
   archiveList.innerHTML = "";
-  if (readArchive.length === 0) {
+  if (!readArchive.length) {
     archiveList.innerHTML = '<li class="status-message">Архив прочитанных новостей пуст.</li>';
     return;
   }
@@ -137,21 +181,17 @@ updateToastBtn.addEventListener("click", () => {
 });
 
 async function initFeed() {
-  localStorage.removeItem("fain_cached_feed_v5");
-  localStorage.removeItem("fain_cached_feed_v6");
-  localStorage.removeItem("fain_cached_feed_v7");
-  updateArchiveBadge();
+  ["v5", "v6", "v7", "v8"].forEach((v) => localStorage.removeItem(`fain_cached_feed_${v}`));
+  saveState();
+  generateSideWaves();
+  window.addEventListener("resize", generateSideWaves, { passive: true });
 
-  const localRaw = localStorage.getItem(STORAGE_KEY);
-  if (localRaw) {
+  const localData = loadJSON(STORAGE_KEY, null);
+  if (localData && !Array.isArray(localData)) {
     try {
-      const localData = JSON.parse(localRaw);
-      if (localData && Array.isArray(localData.items) && localData.items.length > 0) {
-        applyFeedData(localData);
-      }
-    } catch (_) {
-      localStorage.removeItem(STORAGE_KEY);
-    }
+      const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY));
+      if (parsed?.items?.length) applyFeedData(parsed);
+    } catch (_) {}
   }
 
   await fetchFromWorker();
@@ -161,10 +201,7 @@ async function fetchFromWorker() {
   try {
     const response = await fetch(WORKER_URL, { cache: "no-store" });
     const data = await response.json();
-
-    if (!response.ok || data.error) {
-      throw new Error(data.error || `HTTP ${response.status}`);
-    }
+    if (!response.ok || data.error) throw new Error(data.error || `HTTP ${response.status}`);
 
     if (!currentRenderedTimestamp) {
       applyFeedData(data);
@@ -174,9 +211,7 @@ async function fetchFromWorker() {
       updateToastBtn.hidden = false;
     }
 
-    if (data.stale) {
-      pollForBackgroundUpdate(data.updatedAt);
-    }
+    if (data.stale) pollForBackgroundUpdate(data.updatedAt);
   } catch (err) {
     if (!currentRenderedTimestamp) {
       feedContainer.innerHTML = `<p class="status-message">Не удалось загрузить новости: ${escapeHTML(err.message)}</p>`;
@@ -209,16 +244,15 @@ function applyFeedData(data) {
   allFeedItems = (data.items || []).sort((a, b) => (b.date || "").localeCompare(a.date || ""));
   renderArticles(allFeedItems);
 
-  if (data.notice) {
-    lastUpdatedEl.textContent = data.notice;
-  } else if (data.updatedAt) {
-    lastUpdatedEl.textContent = `Обновлено: ${new Date(data.updatedAt).toLocaleString("ru-RU")}`;
-  }
+  lastUpdatedEl.textContent = data.notice
+    ? data.notice
+    : data.updatedAt
+    ? `Обновлено: ${new Date(data.updatedAt).toLocaleString("ru-RU")}`
+    : lastUpdatedEl.textContent;
 }
 
 function renderArticles(items) {
-  const unreadItems = items.filter((item) => !isUrlRead(item.url));
-
+  const unreadItems = items.filter((item) => !dismissedUrls.has(item.url));
   if (!unreadItems.length) {
     feedContainer.innerHTML = '<p class="status-message">Все свежие новости прочитаны.</p>';
     return;
@@ -269,15 +303,11 @@ function renderArticles(items) {
 }
 
 function attachSwipeAndClick(article, item) {
-  let startX = 0;
-  let startY = 0;
-  let currentX = 0;
-  let isDragging = false;
-  let pointerActive = false;
+  let startX = 0, startY = 0, currentX = 0, isDragging = false, active = false;
 
   article.addEventListener("pointerdown", (e) => {
     if (e.target.closest("a") || e.button > 0) return;
-    pointerActive = true;
+    active = true;
     isDragging = false;
     startX = e.clientX;
     startY = e.clientY;
@@ -286,13 +316,13 @@ function attachSwipeAndClick(article, item) {
   });
 
   article.addEventListener("pointermove", (e) => {
-    if (!pointerActive) return;
+    if (!active) return;
     const dx = e.clientX - startX;
     const dy = e.clientY - startY;
 
     if (!isDragging) {
       if (Math.abs(dy) > Math.abs(dx) && Math.abs(dy) > 10) {
-        pointerActive = false;
+        active = false;
         article.style.transition = "";
         return;
       }
@@ -309,35 +339,28 @@ function attachSwipeAndClick(article, item) {
     }
   });
 
-  function endPointer(e) {
-    if (!pointerActive) return;
-    pointerActive = false;
+  article.addEventListener("pointerup", (e) => {
+    if (!active) return;
+    active = false;
     article.style.transition = "";
 
     if (isDragging) {
-      if (currentX > 85) {
-        markItemAsRead(item, article);
-      } else {
+      if (currentX > 85) markItemAsRead(item, article);
+      else {
         article.style.transform = "";
         article.style.opacity = "";
       }
       return;
     }
 
-    const selection = window.getSelection();
-    if (selection && selection.toString().length > 0) return;
-    if (!e.target.closest("a")) {
+    if (!window.getSelection()?.toString().length && !e.target.closest("a")) {
       markItemAsRead(item, article);
     }
-  }
+  });
 
-  article.addEventListener("pointerup", endPointer);
   article.addEventListener("pointercancel", () => {
-    pointerActive = false;
-    isDragging = false;
-    article.style.transition = "";
-    article.style.transform = "";
-    article.style.opacity = "";
+    active = isDragging = false;
+    article.style.transition = article.style.transform = article.style.opacity = "";
   });
 }
 
