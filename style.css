@@ -23,44 +23,59 @@ body {
   overflow-x: hidden;
 }
 
+/* Процедурные синусоиды по бокам от колонки новостей */
+.ascii-side {
+  position: fixed;
+  top: 0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 12px;
+  line-height: 15px;
+  color: rgba(255, 255, 255, 0.16);
+  pointer-events: none;
+  user-select: none;
+  z-index: 0;
+}
 
-.site-header,
-main,
-.archive-view,
-.github-link-wrap,
-.site-footer {
+.ascii-side.left {
+  left: max(1.5rem, calc(50% - 560px));
+}
+
+.ascii-side.right {
+  right: max(1.5rem, calc(50% - 560px));
+}
+
+.site-header, main, .archive-view, .github-link-wrap, .site-footer {
   position: relative;
   z-index: 1;
 }
 
+/* Кнопка архива в стиле иконки GitHub (подсвечивается само лого без обводки) */
 .archive-toggle {
   position: fixed;
-  top: 1.25rem;
-  right: 1.25rem;
+  top: 1.5rem;
+  right: 1.5rem;
   z-index: 50;
   display: inline-flex;
   align-items: center;
-  gap: 0.4rem;
-  background: rgba(12, 12, 12, 0.85);
-  backdrop-filter: blur(8px);
+  gap: 0.35rem;
+  background: none;
+  border: 0;
   color: var(--muted);
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  padding: 0.45rem 0.75rem;
-  font: 500 0.78rem inherit;
+  font: 600 0.85rem inherit;
   cursor: pointer;
-  transition: color 0.2s, border-color 0.2s;
+  transition: color 0.2s, transform 0.2s;
 }
 
 .archive-toggle:hover,
+.archive-toggle:focus-visible,
 .archive-toggle.active {
   color: var(--fg);
-  border-color: var(--fg);
+  transform: translateY(-1px);
 }
 
 .archive-toggle svg {
-  width: 16px;
-  height: 16px;
+  width: 28px;  /* <--- РАЗМЕР ИКОНКИ АРХИВА МЕНЯТЬ ЗДЕСЬ */
+  height: 28px; /* <--- И ЗДЕСЬ */
   fill: currentColor;
 }
 
@@ -78,11 +93,7 @@ main,
   line-height: 1.1;
 }
 
-.site-header p,
-.site-footer,
-.status-message,
-article footer,
-.archive-meta {
+.site-header p, .site-footer, .status-message, article footer, .archive-meta {
   color: var(--muted);
 }
 
@@ -114,15 +125,13 @@ article.removing {
   pointer-events: none;
 }
 
+/* Теги без рамок */
 .news-tag {
   display: inline-block;
-  font-size: 0.75rem;
+  font-size: 0.78rem;
   font-weight: 600;
-  color: #a3a3a3;
-  border: 1px solid #262626;
-  border-radius: 4px;
-  padding: 0.1rem 0.45rem;
-  margin-bottom: 0.45rem;
+  color: var(--muted);
+  margin-bottom: 0.35rem;
 }
 
 article h2 {
@@ -133,15 +142,12 @@ article h2 {
   margin-bottom: 0.65rem;
 }
 
-article h2 a,
-.archive-item a {
+article h2 a, .archive-item a {
   color: var(--fg);
   text-decoration: none;
-  cursor: pointer;
 }
 
-article h2 a:hover,
-.archive-item a:hover {
+article h2 a:hover, .archive-item a:hover {
   text-decoration: underline;
   text-underline-offset: 4px;
 }
@@ -152,10 +158,10 @@ article p {
   margin-bottom: 0.85rem;
 }
 
-article footer,
-.archive-bar {
+article footer, .archive-bar {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   font-size: 0.85rem;
   font-variant-numeric: tabular-nums;
 }
@@ -164,12 +170,18 @@ article footer,
   margin-bottom: 1.75rem;
 }
 
+.archive-actions {
+  display: flex;
+  gap: 1.15rem;
+}
+
 .text-btn {
   background: none;
   border: 0;
   color: var(--muted);
   font: inherit;
   cursor: pointer;
+  transition: color 0.2s;
 }
 
 .text-btn:hover {
@@ -218,8 +230,7 @@ article footer,
   display: none !important;
 }
 
-.status-message,
-.site-footer {
+.status-message, .site-footer {
   text-align: center;
 }
 
@@ -238,7 +249,7 @@ article footer,
   transition: color 0.2s, transform 0.2s;
 }
 
-.github-link:hover {
+.github-link:hover, .github-link:focus-visible {
   color: var(--fg);
   transform: translateY(-1px);
 }
@@ -254,4 +265,18 @@ article footer,
   padding-top: 1.5rem;
   border-top: 1px solid var(--border);
   font-size: 0.85rem;
+}
+
+@media (max-width: 1080px) {
+  .ascii-side {
+    display: none;
+  }
+}
+
+@media (max-width: 540px) {
+  .update-toast {
+    left: 1rem;
+    right: 1rem;
+    bottom: 1rem;
+  }
 }
