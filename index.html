@@ -10,9 +10,38 @@
 </head>
 <body>
 
+  <pre class="ascii-fuji" aria-hidden="true">
+                                                    _.._++**##%%@@#+=.._
+                                                _.-~   .:+*%@@@@@@#*+:. ~-._
+                                             .-~     .:+#@@@%#*+*#%@@#+:.   ~-.
+                                          .-~      .:+#@@%+:..   ..:+%@@*:.    ~-.
+                                       .-~       .:+#@%+:..         ..:*@@#:.     ~-.
+                                    .-~        .:+#@*:.                .:*@@+:.      ~-.
+                                 .-~         .:+#@*:.     ..::~~~::..    .:*@#:.        ~-.
+                              .-~          .:+#@+:.   ..:~+*#######*+~:.   .:*@#:.         ~-.
+                           .-~           .:*@#:.   .:~*#@@@@@@@@@@@@@@@#*~:. .:+%#:.          ~-.
+                        .-~            .:+@*:.  .:+*@@@@@@@@@@@@@@@@@@@@@@@#*:. .:*@+:.           ~-.
+                    _.-~             .:+@*:. .:+%@@@@@@@@@@@@@@@@@@@@@@@@@@@@@%*:. .:*@+:.            ~-._
+                _.-~               .:+@*...:+%@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@%*:. .:*@+:.              ~-._
+           _..-~                 .:+#+..:+%@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@%*:. .:*#+:.                ~-.._
+     _..-~                     .:+#+.:+#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@#+:..:*#+:.                    ~-.._
+..-~                         .:*#+.:+#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@#+:..+*+:.                        ~-..
+============================*@@%#*#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@#*#%@@*============================
+~~~~~~~~~~~~~~~~~~~~~~~~~~~==========================================================================~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  ---  -- -  --  ---   ---  -- -  ---   ---  -- -  --  ---   ---  -- -  --  ---   ---  -- -  --  ---   ---  -- -  --  ---  --
+        --  ---   -- -        --  ---   -- -         --  ---   -- -        --  ---   -- -        --  ---   -- -
+  </pre>
+
+  <button id="archive-toggle" class="archive-toggle" type="button" aria-label="Прочитанные новости" title="Прочитанные новости">
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M4 4h16v4H4V4zm2 6h12v10H6V10zm4 3v2h4v-2h-4z"/>
+    </svg>
+    <span id="archive-count" class="archive-count" hidden>0</span>
+  </button>
+
   <header class="site-header">
     <h1>fain</h1>
-    <p>free ai news — свободные новости про ИИ, от ИИ</p>
+    <p id="header-subtitle">free ai news — свободные новости про ИИ, от ИИ</p>
   </header>
 
   <button id="update-toast" class="update-toast" hidden aria-live="polite">Обновить ленту</button>
@@ -20,6 +49,14 @@
   <main id="news-feed" aria-live="polite">
     <p class="status-message">Сбор и фильтрация свежих материалов...</p>
   </main>
+
+  <section id="archive-view" class="archive-view" hidden aria-live="polite">
+    <div class="archive-bar">
+      <button id="back-to-feed" class="text-btn" type="button">← Назад к ленте</button>
+      <button id="clear-archive" class="text-btn" type="button">Очистить архив</button>
+    </div>
+    <ul id="archive-list" class="archive-list"></ul>
+  </section>
 
   <div class="github-link-wrap">
     <a href="https://github.com/beassaf01/fain" class="github-link" target="_blank" rel="noopener noreferrer" aria-label="GitHub репозиторий fain">
