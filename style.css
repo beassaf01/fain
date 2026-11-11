@@ -23,20 +23,6 @@ body {
   overflow-x: hidden;
 }
 
-.ascii-fuji {
-  position: fixed;
-  left: 50%;
-  bottom: 4vh;
-  transform: translateX(-50%);
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: clamp(6px, 1.05vw, 12px);
-  line-height: 1.15;
-  color: rgba(255, 255, 255, 0.055);
-  pointer-events: none;
-  user-select: none;
-  z-index: 0;
-  white-space: pre;
-}
 
 .site-header,
 main,
