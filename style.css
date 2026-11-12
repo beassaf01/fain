@@ -25,6 +25,7 @@ html, body {
   -webkit-font-smoothing: antialiased;
 }
 
+
 /* Боковые синусоидные ASCII-графики */
 .ascii-side {
   position: fixed;
