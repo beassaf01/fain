@@ -76,9 +76,9 @@ function mergeNewsItems(localItems, remoteItems, now) {
   }
 
   const merged = Array.from(byId.values());
-  return filterRecentItems(merged, now).sort(
-    (a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
-  );
+  return filterRecentItems(merged, now)
+    .sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime())
+    .slice(0, 50);
 }
 
 function filterRecentItems(items, now) {
