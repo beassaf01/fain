@@ -170,10 +170,7 @@ html, body {
 }
 
 .news-analysis-wrap.open {
-  max-height: 1000px; /* было 360px */
-  opacity: 1;
-  margin: 12px 0 8px;
-}
+  max-height: 1000px;
   opacity: 1;
   margin: 12px 0 8px;
 }
