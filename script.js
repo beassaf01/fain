@@ -337,12 +337,10 @@ function initAsciiSineWaves() {
       for (let x = 0; x < width; x++) {
         if (x === waveL1) rowL += "•";
         else if (x === waveL2) rowL += "·";
-        else if (x === center) rowL += "│";
         else rowL += " ";
 
         if (x === waveR1) rowR += "•";
         else if (x === waveR2) rowR += "·";
-        else if (x === center) rowR += "│";
         else rowR += " ";
       }
 
