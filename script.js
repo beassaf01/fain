@@ -1,7 +1,7 @@
 const WORKER_URL = "https://fain-worker.weraktesau.workers.dev/";
 
 const STORAGE_KEYS = {
-  ITEMS: "fain_cached_items_v1",
+  ITEMS: "fain_cached_items_v2",
   READ_IDS: "fain_read_ids_v1",
   LAST_UPDATED: "fain_last_updated_v1"
 };
