@@ -83,11 +83,22 @@ html, body {
 .site-logo {
   width: 104px;
   height: 104px;
-  object-fit: contain;
+  color: var(--text-main);
   flex-shrink: 0;
-  mix-blend-mode: lighten;
   user-select: none;
   pointer-events: none;
+  transform-origin: center;
+  will-change: transform;
+  animation: logo-spin 2.8s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+}
+
+@keyframes logo-spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  85%, 100% {
+    transform: rotate(360deg);
+  }
 }
 
 .site-title-group {
