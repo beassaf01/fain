@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000" width="100%" height="100%">
+  <style>
+    .spinner {
+      transform-origin: 500px 500px;
+      animation: logo-spin 2.8s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+    }
+    @keyframes logo-spin {
+      0% {
+        transform: rotate(0deg);
+      }
+      85%, 100% {
+        transform: rotate(360deg);
+      }
+    }
+  </style>
+  <!-- Черный фон как на logo.jpg (удалите строку ниже, если нужен прозрачный фон) -->
+  <rect width="1000" height="1000" fill="#000000" />
+  <polygon class="spinner" fill="#ffffff" points="638,170 638,420 671,362 830,638 580,638 638,671 362,830 362,580 329,638 170,362 420,362 362,329" />
+</svg>
