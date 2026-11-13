@@ -1,27 +1,18 @@
 <div align="center">
-
-<pre>
-·  •              •  ·
- •  ·            ·  • 
-  •  ·          ·  •  
-</pre>
-
-<img src="logo.jpg" alt="fain logo" width="96" height="96" />
+<img src="logo.svg" alt="fain logo" width="120" height="120" />
 
 # fain
 **free ai news**
 
-*минималистичный терминальный поток ии-новостей без информационного шума*
 
 <br />
 
-<!-- Главные кнопки: Android-релиз и Сайт -->
-[![скачать android apk](https://img.shields.io/badge/android-скачать_apk-ffffff?style=for-the-badge&logo=android&logoColor=000000&labelColor=0a0a0a)](https://github.com/lqsaf/fain/releases/latest)
+<!-- Главные кнопки: Сайт, Android APK, Репозиторий приложения и VirusTotal -->
 [![открыть веб-версию](https://img.shields.io/badge/web-открыть_поток-ffffff?style=for-the-badge&logo=googlechrome&logoColor=000000&labelColor=0a0a0a)](https://lqsaf.github.io/fain/)
+[![скачать android apk](https://img.shields.io/badge/android-скачать_apk-ffffff?style=for-the-badge&logo=android&logoColor=000000&labelColor=0a0a0a)](https://github.com/lqsaf/fain/releases/latest)
 
-<!-- Статусные панельки -->
-[![release](https://img.shields.io/github/v/release/lqsaf/fain?style=flat-square&label=релиз&labelColor=0a0a0a&color=525252)](https://github.com/lqsaf/fain/releases/latest)
-[![downloads](https://img.shields.io/github/downloads/lqsaf/fain/total?style=flat-square&label=скачиваний_apk&labelColor=0a0a0a&color=525252)](https://github.com/lqsaf/fain/releases)
+[![fain-app repo](https://img.shields.io/badge/repo-fain--app-525252?style=flat-square&logo=github&logoColor=ffffff&labelColor=0a0a0a)](https://github.com/lqsaf/fain-app)
+[![virustotal](https://img.shields.io/badge/virustotal-проверено-525252?style=flat-square&logo=virustotal&logoColor=ffffff&labelColor=0a0a0a)](https://www.virustotal.com/gui/file/4706304c6ddfe293ee46a127b873145495176d0e101297e3fbd341f1411a9b78?nocache=1)
 [![worker](https://img.shields.io/badge/pipeline-fain--worker_(private)-525252?style=flat-square&logo=cloudflare&logoColor=ffffff&labelColor=0a0a0a)](https://github.com/lqsaf/fain)
 [![cron](https://img.shields.io/badge/синхронизация-каждый_час-525252?style=flat-square&labelColor=0a0a0a)](https://github.com/lqsaf/fain)
 
@@ -49,9 +40,10 @@
 
 ### `// архитектура и ии-конвейер`
 
-Проект разделен на два репозитория:
-1. **`fain` (публичный)** — легковесный фронтенд на чистом HTML5, CSS3 и Vanilla JS без сборщиков и тяжелых фреймворков, а также релизы Android-клиента.
-2. **`fain-worker` (приватный)** — серверный конвейер на базе **Cloudflare Workers**, хранилища **Cloudflare KV** и почасовых Cron-триггеров (`0 * * * *`).
+Экосистема проекта разделена на три репозитория:
+1. **`fain` (публичный)** — легковесный веб-клиент на чистом HTML5, CSS3 и Vanilla JS без сборщиков и фреймворков.
+2. **[`fain-app`](https://github.com/lqsaf/fain-app) (публичный)** — исходный код оболочки Android-приложения. Готовые сборки публикуются в [Releases](https://github.com/lqsaf/fain/releases/latest) ([отчет VirusTotal](https://www.virustotal.com/gui/file/4706304c6ddfe293ee46a127b873145495176d0e101297e3fbd341f1411a9b78?nocache=1)).
+3. **`fain-worker` (приватный)** — серверный конвейер на базе **Cloudflare Workers**, хранилища **Cloudflare KV** и почасовых Cron-триггеров (`0 * * * *`).
 
 #### как работает `fain-worker`:
 
@@ -80,8 +72,6 @@
 [ Cloudflare KV ] ──► раздача готового JSON-слепка клиентам fain
 ```
 
-Каждый из 5 шагов конвейера использует выделенные API-ключи и автоматический каскадный фоллбэк по семейству моделей Gemini со строгой валидацией JSON Schema.
-
 ---
 
 ### `// структура репозитория`
@@ -91,19 +81,19 @@ fain/
 ├── index.html      # разметка страницы, SVG-логотип и контейнеры ASCII-графиков
 ├── styles.css      # монохромная тема, анимации схлопывания и адаптивная сетка
 ├── script.js       # синхронизация с воркером, кэш в localStorage и рендер синусоид
-└── logo.jpg        # оригинальный логотип проекта
+├── logo.svg        # анимированный векторный логотип проекта
+└── logo.jpg        # растровый логотип проекта
 ```
-*(серверный код `worker.js` и конфигурация `wrangler.toml` поддерживаются в приватном репозитории `fain-worker`)*
 
 ---
 
 ### `// запуск и установка`
 
 **Android:**
-Скачайте актуальный `.apk` файл из раздела [**Releases**](https://github.com/lqsaf/fain/releases/latest) и установите на устройство.
+Скачайте актуальный `.apk` из раздела [**Releases**](https://github.com/lqsaf/fain/releases/latest) ([проверка VirusTotal](https://www.virustotal.com/gui/file/4706304c6ddfe293ee46a127b873145495176d0e101297e3fbd341f1411a9b78?nocache=1)). Исходный код приложения доступен в репозитории [**lqsaf/fain-app**](https://github.com/lqsaf/fain-app).
 
 **Локальный запуск веб-клиента:**
-Проект не требует `npm install` или сборки. Достаточно раздать статику любым локальным сервером:
+Проект не требует сборки. Достаточно раздать статику любым локальным сервером:
 
 ```bash
 git clone [https://github.com/lqsaf/fain.git](https://github.com/lqsaf/fain.git)
