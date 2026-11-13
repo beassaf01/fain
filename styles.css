@@ -73,8 +73,28 @@ html, body {
 }
 
 .site-header {
-  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
   margin-bottom: 52px;
+}
+
+.site-logo {
+  width: 64px;
+  height: 64px;
+  object-fit: contain;
+  flex-shrink: 0;
+  mix-blend-mode: lighten;
+  user-select: none;
+  pointer-events: none;
+}
+
+.site-title-group {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
 }
 
 .logo {
@@ -83,7 +103,7 @@ html, body {
   letter-spacing: 0.14em;
   text-transform: lowercase;
   color: var(--text-main);
-  line-height: 1.1;
+  line-height: 1.05;
 }
 
 .subtitle {
